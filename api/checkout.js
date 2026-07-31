@@ -132,7 +132,7 @@ export default async function handler(req, res) {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+          Authorization: `Bearer ${process.env.STRP_SECRET_KEY}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({

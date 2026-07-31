@@ -50,7 +50,7 @@ const DESIGNS = [
     id: '3', 
     key: 'persevere', 
     label: 'Persevere',
-    description: 'I just kept trying.<br>Back-print • Navy tee • €39',
+    description: "I'm not lucky, I just kept trying.<br>Back-print • Navy tee • €39",
     types:  ['tshirt'],
     colors: ['navy'],
     images: ['athlete.jpg', 'athlete-lifestyle.jpg'],

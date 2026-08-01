@@ -500,60 +500,12 @@
             z-index: 2;
         }
 
-        .about-slideshow {
+        .about-canvas {
             position: absolute;
             inset: 0;
-        }
-
-        .about-slide {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            transform: scale(1.04);
-            transition: opacity 1.1s var(--ease), transform 6s linear;
-        }
-
-        .about-slide img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            filter: grayscale(15%);
-        }
-
-        .about-slide.active {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .about-dots {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 18px;
-            z-index: 3;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .about-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.55);
-            border: none;
-            padding: 0;
-            cursor: pointer;
-            transition: background 0.4s var(--ease), transform 0.4s var(--ease);
-        }
-
-        .about-dot:hover {
-            background: rgba(255, 255, 255, 0.85);
-        }
-
-        .about-dot.active {
-            background: var(--white);
-            transform: scale(1.3);
+            display: block;
         }
 
         .about-kicker {
@@ -831,17 +783,23 @@
             overflow-y: auto;
             padding: 48px 5%;
             width: 100%;
-            max-width: 640px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .cart-item {
             display: flex;
-            gap: 14px;
+            align-items: flex-start;
+            gap: 24px;
             margin-bottom: 22px;
             padding-bottom: 22px;
             border-bottom: 1px solid var(--border);
             animation: itemIn 0.5s var(--ease) both;
+            cursor: pointer;
+        }
+
+        .cart-item:hover .cart-item-name {
+            color: var(--accent);
         }
 
         @keyframes itemIn {
@@ -857,22 +815,19 @@
             to { opacity: 0; transform: translateX(24px); max-height: 0; margin: 0; padding: 0; }
         }
 
-        .cart-item-image {
-            width: 88px;
-            height: 110px;
-            background: var(--gray);
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        .cart-item-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .cart-item-info {
+        .cart-item-main {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cart-item-side {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            padding-top: 2px;
         }
 
         .cart-item-name {
@@ -881,6 +836,7 @@
             font-size: 14px;
             letter-spacing: 0.2px;
             margin-bottom: 6px;
+            transition: color 0.35s var(--ease);
         }
 
         .cart-item-details {
@@ -972,8 +928,8 @@
 
         .cart-item-price {
             color: var(--black);
-            font-size: 12px;
-            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .cart-item-remove button {
@@ -1004,7 +960,7 @@
             flex-direction: column;
             gap: 18px;
             width: 100%;
-            max-width: 640px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
@@ -1178,9 +1134,8 @@
 
         <!-- ABOUT -->
         <section class="about-section" id="about">
-            <div class="about-media reveal">
-                <div class="about-slideshow" id="aboutSlideshow"></div>
-                <div class="about-dots" id="aboutDots"></div>
+            <div class="about-media reveal" id="aboutMedia">
+                <canvas id="aboutCanvas" class="about-canvas"></canvas>
             </div>
             <div class="reveal">
                 <h2 class="about-title">Charm and permanence over trends</h2>
@@ -1277,48 +1232,107 @@
             observeReveals();
         }
 
-        // Render the About section as an auto-rotating slideshow, built
-        // from the same product photography rather than a single static frame.
-        let aboutSlideIndex = 0;
-        let aboutSlideTimer = null;
-        function initAboutSlideshow() {
-            const track = document.getElementById('aboutSlideshow');
-            const dots = document.getElementById('aboutDots');
-            if (!track || !dots) return;
+        // Render the About section as a single static portrait. The image
+        // stays still — instead, a mosaic pixelation grows stronger the
+        // closer the cursor gets, and settles back to a sharp photo elsewhere.
+        function initAboutPixelation() {
+            const container = document.getElementById('aboutMedia');
+            const canvas = document.getElementById('aboutCanvas');
+            if (!container || !canvas) return;
 
-            const slides = DESIGNS.slice(0, 4);
-            if (slides.length === 0) return;
+            const design = DESIGNS[0];
+            if (!design) return;
 
-            track.innerHTML = slides.map((design, i) => `
-                <div class="about-slide ${i === 0 ? 'active' : ''}">
-                    <img src="/images/${coverImg(design.key)}" alt="${design.label}">
-                </div>
-            `).join('');
-            dots.innerHTML = slides.map((_, i) => `
-                <button class="about-dot ${i === 0 ? 'active' : ''}" onclick="goToAboutSlide(${i})" aria-label="Show slide ${i + 1}"></button>
-            `).join('');
+            const ctx = canvas.getContext('2d');
+            const CANVAS_W = 480;
+            const CANVAS_H = 600;
+            canvas.width = CANVAS_W;
+            canvas.height = CANVAS_H;
 
-            aboutSlideIndex = 0;
-            resetAboutSlideTimer();
-        }
+            const MIN_CELL = 6;   // sampling / redraw granularity
+            const MAX_BLOCK = 46; // block size right under the cursor
+            const RADIUS = 170;   // reach of the effect, in canvas px
 
-        function goToAboutSlide(index) {
-            const slideEls = document.querySelectorAll('#aboutSlideshow .about-slide');
-            const dotEls = document.querySelectorAll('#aboutDots .about-dot');
-            if (!slideEls.length) return;
+            let sourceCanvas = null;
+            let sourceData = null;
+            let mouseX = -9999;
+            let mouseY = -9999;
+            let hovering = false;
+            let rafPending = false;
 
-            aboutSlideIndex = (index + slideEls.length) % slideEls.length;
-            slideEls.forEach((el, i) => el.classList.toggle('active', i === aboutSlideIndex));
-            dotEls.forEach((el, i) => el.classList.toggle('active', i === aboutSlideIndex));
-            resetAboutSlideTimer();
-        }
+            function sampleColor(x, y) {
+                const idx = (y * CANVAS_W + x) * 4;
+                return `rgb(${sourceData[idx]},${sourceData[idx + 1]},${sourceData[idx + 2]})`;
+            }
 
-        function resetAboutSlideTimer() {
-            clearInterval(aboutSlideTimer);
-            aboutSlideTimer = setInterval(() => {
-                const slideEls = document.querySelectorAll('#aboutSlideshow .about-slide');
-                if (slideEls.length) goToAboutSlide(aboutSlideIndex + 1);
-            }, 4200);
+            function render() {
+                rafPending = false;
+                if (!sourceCanvas) return;
+                ctx.drawImage(sourceCanvas, 0, 0, CANVAS_W, CANVAS_H);
+                if (!hovering) return;
+
+                const left = Math.max(0, Math.floor((mouseX - RADIUS) / MIN_CELL) * MIN_CELL);
+                const top = Math.max(0, Math.floor((mouseY - RADIUS) / MIN_CELL) * MIN_CELL);
+                const right = Math.min(CANVAS_W, Math.ceil((mouseX + RADIUS) / MIN_CELL) * MIN_CELL);
+                const bottom = Math.min(CANVAS_H, Math.ceil((mouseY + RADIUS) / MIN_CELL) * MIN_CELL);
+
+                for (let y = top; y < bottom; y += MIN_CELL) {
+                    for (let x = left; x < right; x += MIN_CELL) {
+                        const cx = x + MIN_CELL / 2;
+                        const cy = y + MIN_CELL / 2;
+                        const dist = Math.hypot(cx - mouseX, cy - mouseY);
+                        if (dist > RADIUS) continue;
+
+                        const t = dist / RADIUS;
+                        const block = Math.max(MIN_CELL, Math.round(MAX_BLOCK - (MAX_BLOCK - MIN_CELL) * t));
+                        const sx = Math.min(CANVAS_W - 1, Math.floor(cx / block) * block + Math.floor(block / 2));
+                        const sy = Math.min(CANVAS_H - 1, Math.floor(cy / block) * block + Math.floor(block / 2));
+
+                        ctx.fillStyle = sampleColor(sx, sy);
+                        ctx.fillRect(x, y, MIN_CELL, MIN_CELL);
+                    }
+                }
+            }
+
+            function scheduleRender() {
+                if (rafPending) return;
+                rafPending = true;
+                requestAnimationFrame(render);
+            }
+
+            function toCanvasCoords(clientX, clientY) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: (clientX - rect.left) * (CANVAS_W / rect.width),
+                    y: (clientY - rect.top) * (CANVAS_H / rect.height)
+                };
+            }
+
+            container.addEventListener('mousemove', (e) => {
+                const pos = toCanvasCoords(e.clientX, e.clientY);
+                mouseX = pos.x;
+                mouseY = pos.y;
+                hovering = true;
+                scheduleRender();
+            });
+
+            container.addEventListener('mouseleave', () => {
+                hovering = false;
+                scheduleRender();
+            });
+
+            const img = new Image();
+            img.onload = () => {
+                sourceCanvas = document.createElement('canvas');
+                sourceCanvas.width = CANVAS_W;
+                sourceCanvas.height = CANVAS_H;
+                const sctx = sourceCanvas.getContext('2d');
+                sctx.filter = 'grayscale(15%)';
+                sctx.drawImage(img, 0, 0, CANVAS_W, CANVAS_H);
+                sourceData = sctx.getImageData(0, 0, CANVAS_W, CANVAS_H).data;
+                render();
+            };
+            img.src = `/images/${coverImg(design.key)}`;
         }
 
         // ──── ROUTER ────
@@ -1407,6 +1421,7 @@
 
             const item = {
                 id: currentProduct.id,
+                key: currentProduct.key,
                 design: currentProduct.label,
                 size: currentSize,
                 price: 39,
@@ -1444,6 +1459,15 @@
                 document.getElementById('cartSidebar').classList.add('open');
                 document.body.classList.add('cart-lock');
             }, 250);
+        }
+
+        // Go back to a product's page by clicking its cart item
+        function goToProductFromCart(index) {
+            const item = cart[index];
+            if (!item || !item.key) return;
+            document.getElementById('cartSidebar').classList.remove('open');
+            document.body.classList.remove('cart-lock');
+            location.hash = `#/product/${item.key}`;
         }
 
         // Open/close the custom size dropdown for a cart item
@@ -1514,27 +1538,26 @@
             }
 
             cartItems.innerHTML = cart.map((item, i) => `
-                <div class="cart-item" data-index="${i}" style="animation-delay:${i * 0.05}s">
-                    <div class="cart-item-image">
-                        <img src="/images/${item.image}" alt="">
-                    </div>
-                    <div class="cart-item-info">
+                <div class="cart-item" data-index="${i}" style="animation-delay:${i * 0.05}s" onclick="goToProductFromCart(${i})">
+                    <div class="cart-item-main">
                         <div class="cart-item-name">${item.design}</div>
                         <div class="cart-item-details cart-item-size-row">
                             <span>Size</span>
                             <div class="cart-size-dropdown" data-index="${i}">
-                                <button type="button" class="cart-size-current" onclick="toggleSizeDropdown(event, ${i})" aria-haspopup="listbox" aria-expanded="false">
+                                <button type="button" class="cart-size-current" onclick="event.stopPropagation(); toggleSizeDropdown(event, ${i})" aria-haspopup="listbox" aria-expanded="false">
                                     <span class="cart-size-current-label">${item.size}</span>
                                     <span class="dd-arrow"></span>
                                 </button>
                                 <div class="cart-size-options" role="listbox">
-                                    ${SIZES.map(size => `<button type="button" class="cart-size-option ${size === item.size ? 'active' : ''}" role="option" aria-selected="${size === item.size}" onclick="changeCartItemSize(${i}, '${size}')">${size}</button>`).join('')}
+                                    ${SIZES.map(size => `<button type="button" class="cart-size-option ${size === item.size ? 'active' : ''}" role="option" aria-selected="${size === item.size}" onclick="event.stopPropagation(); changeCartItemSize(${i}, '${size}')">${size}</button>`).join('')}
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="cart-item-side">
                         <div class="cart-item-price">€${item.price}</div>
                         <div class="cart-item-remove">
-                            <button onclick="removeFromCart(${i})">Remove</button>
+                            <button onclick="event.stopPropagation(); removeFromCart(${i})">Remove</button>
                         </div>
                     </div>
                 </div>
@@ -1619,7 +1642,7 @@
 
         // Initialize
         renderGrid();
-        initAboutSlideshow();
+        initAboutPixelation();
         updateCart();
         observeReveals();
         initHeaderScroll();

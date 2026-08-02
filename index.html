@@ -11,7 +11,7 @@
 
     <style>
         :root {
-            --black: #111111;
+            --black: #1A2A4A;
             --white: #ffffff;
             --gray: #f0efec;
             --text-muted: #767676;
@@ -108,7 +108,7 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
-            padding: 22px 5%;
+            padding: 17px 5%;
             display: grid;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
@@ -119,7 +119,7 @@
         }
 
         header.scrolled {
-            padding: 14px 5%;
+            padding: 17px 5%;
             box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.08);
         }
 
@@ -415,15 +415,31 @@
         }
 
         .product-image-wrap img {
+            position: absolute;
+            inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
             filter: contrast(1.02);
             transition: filter 0.7s var(--ease), opacity 0.6s var(--ease);
-            opacity: 0;
         }
 
-        .product-image-wrap img.loaded {
+        .product-img-primary {
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .product-img-primary.loaded {
+            opacity: 1;
+        }
+
+        .product-img-secondary {
+            opacity: 0;
+            z-index: 2;
+            transition: opacity 0.5s var(--ease-soft);
+        }
+
+        .product-card:hover .product-img-secondary {
             opacity: 1;
         }
 
@@ -500,12 +516,19 @@
             z-index: 2;
         }
 
-        .about-canvas {
+        .about-img {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
-            display: block;
+            object-fit: cover;
+            filter: grayscale(15%);
+            opacity: 0;
+            transition: opacity 0.6s var(--ease-soft);
+        }
+
+        .about-img.loaded {
+            opacity: 1;
         }
 
         .about-kicker {
@@ -1000,56 +1023,243 @@
 
         /* ──── FOOTER ──── */
         footer {
-            margin-top: 40px;
-            border-top: 1px solid var(--border);
-            padding: 36px 5%;
+            margin-top: 60px;
+            background: #5E1818;
+            color: rgba(255, 255, 255, 0.92);
+            padding: 64px 6% 46px;
         }
 
-        .footer-grid {
-            max-width: 1200px;
+        .footer-inner {
+            max-width: 1280px;
             margin: 0 auto;
+        }
+
+        .footer-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 16px;
-        }
-
-        .footer-brand {
-            font-weight: 600;
             font-size: 13px;
+            letter-spacing: 0.2px;
+            padding-bottom: 40px;
+            margin-bottom: 48px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.28);
         }
 
-        .footer-col p,
-        .footer-col h3 {
-            display: none;
-        }
-
-        .footer-col ul {
-            list-style: none;
+        .footer-social {
             display: flex;
-            gap: 18px;
+            justify-content: center;
+            gap: 34px;
+            margin-bottom: 68px;
         }
 
-        .footer-col a {
-            color: var(--text-muted);
-            text-decoration: none;
+        .footer-social a {
+            color: rgba(255, 255, 255, 0.92);
+            display: inline-flex;
+            opacity: 0.9;
+        }
+
+        .footer-social a:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+
+        .footer-social svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .footer-columns {
+            display: flex;
+            justify-content: space-between;
+            gap: 60px;
+            flex-wrap: wrap;
+            margin-bottom: 80px;
+        }
+
+        .footer-signup {
+            max-width: 380px;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .footer-signup label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 22px;
+        }
+
+        .footer-email-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+            padding-bottom: 12px;
+            transition: border-color 0.35s var(--ease);
+        }
+
+        .footer-email-row:focus-within {
+            border-bottom-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .footer-email-row input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--white);
+            font-family: inherit;
+            font-size: 14px;
+            padding: 4px 0;
+        }
+
+        .footer-email-row input::placeholder {
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        .footer-email-row input:focus {
+            outline: none;
+        }
+
+        .footer-email-row button {
+            background: transparent;
+            border: none;
+            color: var(--white);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 0 0 14px;
+            display: inline-flex;
+            transition: transform 0.35s var(--ease);
+        }
+
+        .footer-email-row button:hover {
+            transform: translateX(4px);
+        }
+
+        .footer-signup-note {
             font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 16px;
+            min-height: 16px;
         }
 
-        .footer-col a:hover {
-            color: var(--black);
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 28px;
+            min-width: 200px;
+        }
+
+        .footer-links a,
+        .footer-help-toggle {
+            color: var(--white);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            padding: 0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-links a:hover,
+        .footer-help-toggle:hover {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .footer-help-toggle .chevron {
+            font-size: 12px;
+            transition: transform 0.35s var(--ease);
+        }
+
+        .footer-help-toggle.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .footer-help-panel {
+            max-height: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: max-height 0.4s var(--ease), opacity 0.35s var(--ease);
+            opacity: 0;
+            margin-top: -10px;
+        }
+
+        .footer-help-panel.open {
+            max-height: 220px;
+            opacity: 1;
+            margin-top: 16px;
+        }
+
+        .footer-help-panel a {
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+
+        .footer-help-panel a:hover {
+            color: var(--white);
+        }
+
+        .footer-seal {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .footer-seal svg {
+            width: 96px;
+            height: 96px;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .footer-bottom {
-            max-width: 1200px;
-            margin: 16px auto 0;
-            font-size: 11px;
-            color: var(--text-muted);
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.65);
         }
 
-        .footer-bottom a {
-            color: var(--text-muted);
+        @media (max-width: 768px) {
+            footer {
+                padding: 48px 6% 36px;
+            }
+
+            .footer-top {
+                flex-direction: column;
+                text-align: center;
+                gap: 14px;
+                margin-bottom: 40px;
+            }
+
+            .footer-social {
+                margin-bottom: 52px;
+            }
+
+            .footer-columns {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 48px;
+                margin-bottom: 60px;
+            }
+
+            .footer-signup {
+                max-width: none;
+                width: 100%;
+            }
+
+            .footer-links {
+                align-items: center;
+            }
         }
 
         /* ──── RESPONSIVE ──── */
@@ -1135,7 +1345,7 @@
         <!-- ABOUT -->
         <section class="about-section" id="about">
             <div class="about-media reveal" id="aboutMedia">
-                <canvas id="aboutCanvas" class="about-canvas"></canvas>
+                <img id="aboutImg" class="about-img" alt="Camille Fascino">
             </div>
             <div class="reveal">
                 <h2 class="about-title">Charm and permanence over trends</h2>
@@ -1187,19 +1397,63 @@
 
     <!-- FOOTER -->
     <footer id="contact">
-        <div class="footer-grid reveal">
-            <div class="footer-brand">Camille Fascino</div>
-            <div class="footer-col">
-                <ul>
-                    <li><a href="/return-policy">Return Policy</a></li>
-                    <li><a href="/privacy-policy">Privacy Policy</a></li>
-                    <li><a href="/terms-of-service">Terms of Service</a></li>
-                    <li><a href="/shipping-policy">Shipping Policy</a></li>
-                </ul>
+        <div class="footer-inner">
+            <div class="footer-top reveal">
+                <span>Designed In France</span>
+                <span>Free Delivery Over €150</span>
+                <span>Worldwide Shipping — Duties Included</span>
             </div>
-        </div>
-        <div class="footer-bottom reveal" style="--reveal-delay:0.15s">
-            © 2026 Camille Fascino
+
+            <div class="footer-social reveal">
+                <a href="#" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <rect x="3" y="3" width="18" height="18" rx="5"/>
+                        <circle cx="12" cy="12" r="4.2"/>
+                        <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/>
+                    </svg>
+                </a>
+                <a href="#" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.1 8.4h-2v-1.5c0-.6.4-.8.8-.8h1.1V3.2l-1.9-.01c-2.5 0-3.6 1.7-3.6 3.9v1.3H7.7v3h1.8V21h3.6v-9.6h2l.4-3z"/>
+                    </svg>
+                </a>
+                <a href="#" aria-label="TikTok">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14.3 3h2.4c.2 1.8 1.3 3.2 3.3 3.5v2.4c-1.3 0-2.4-.4-3.3-1.1v6.3c0 3-2.4 5.3-5.3 5.1-2.7-.1-4.9-2.3-5-5-.1-2.8 2.1-5.1 4.9-5.2.3 0 .6 0 .9.1v2.5a2.4 2.4 0 1 0 1.7 2.3V3z"/>
+                    </svg>
+                </a>
+            </div>
+
+            <div class="footer-columns reveal">
+                <div class="footer-signup">
+                    <label for="footerEmail">Sign Up for Early Access</label>
+                    <div class="footer-email-row">
+                        <input type="email" id="footerEmail" placeholder="Email Address" autocomplete="email">
+                        <button type="button" aria-label="Subscribe" onclick="subscribeFooterEmail()">→</button>
+                    </div>
+                    <div class="footer-signup-note" id="footerSignupNote"></div>
+                </div>
+
+                <div class="footer-links">
+                    <a href="#about">About Camille Fascino</a>
+                    <div>
+                        <button type="button" class="footer-help-toggle" id="footerHelpToggle" onclick="toggleFooterHelp()">
+                            Help &amp; Info <span class="chevron">⌄</span>
+                        </button>
+                        <div class="footer-help-panel" id="footerHelpPanel">
+                            <a href="/return-policy">Return Policy</a>
+                            <a href="/privacy-policy">Privacy Policy</a>
+                            <a href="/terms-of-service">Terms of Service</a>
+                            <a href="/shipping-policy">Shipping Policy</a>
+                        </div>
+                    </div>
+                    <a href="#contact">Contact Us</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom reveal" style="--reveal-delay:0.15s">
+                © 2026 Camille Fascino
+            </div>
         </div>
     </footer>
 
@@ -1214,10 +1468,14 @@
         function renderGrid() {
             const grid = document.getElementById('productsGrid');
             const designs = DESIGNS.slice(0, 3); // Only first 3 products
-            grid.innerHTML = designs.map((design, i) => `
+            grid.innerHTML = designs.map((design, i) => {
+                const cover = coverImg(design.key);
+                const secondary = (design.images || []).find(img => img !== cover);
+                return `
                 <a href="#/product/${design.key}" class="product-card reveal">
                     <div class="product-image-wrap">
-                        <img src="/images/${coverImg(design.key)}" alt="${design.label}" onload="this.classList.add('loaded')">
+                        <img class="product-img-primary" src="/images/${cover}" alt="${design.label}" onload="this.classList.add('loaded')">
+                        ${secondary ? `<img class="product-img-secondary" src="/images/${secondary}" alt="${design.label}" loading="lazy">` : ''}
                     </div>
                     <div class="product-info">
                         <div>
@@ -1227,111 +1485,22 @@
                         <div class="product-price">€39</div>
                     </div>
                 </a>
-            `).join('');
+            `;
+            }).join('');
             staggerReveals(grid, 80);
             observeReveals();
         }
 
-        // Render the About section as a single static portrait. The image
-        // stays still — instead, a mosaic pixelation grows stronger the
-        // closer the cursor gets, and settles back to a sharp photo elsewhere.
-        function initAboutPixelation() {
-            const container = document.getElementById('aboutMedia');
-            const canvas = document.getElementById('aboutCanvas');
-            if (!container || !canvas) return;
+        // Render the About section image: a single static, sharp portrait
+        // (no interactive pixel/mosaic effect).
+        function initAboutImage() {
+            const img = document.getElementById('aboutImg');
+            if (!img) return;
 
             const design = DESIGNS[0];
             if (!design) return;
 
-            const ctx = canvas.getContext('2d');
-            const CANVAS_W = 480;
-            const CANVAS_H = 600;
-            canvas.width = CANVAS_W;
-            canvas.height = CANVAS_H;
-
-            const MIN_CELL = 6;   // sampling / redraw granularity
-            const MAX_BLOCK = 46; // block size right under the cursor
-            const RADIUS = 170;   // reach of the effect, in canvas px
-
-            let sourceCanvas = null;
-            let sourceData = null;
-            let mouseX = -9999;
-            let mouseY = -9999;
-            let hovering = false;
-            let rafPending = false;
-
-            function sampleColor(x, y) {
-                const idx = (y * CANVAS_W + x) * 4;
-                return `rgb(${sourceData[idx]},${sourceData[idx + 1]},${sourceData[idx + 2]})`;
-            }
-
-            function render() {
-                rafPending = false;
-                if (!sourceCanvas) return;
-                ctx.drawImage(sourceCanvas, 0, 0, CANVAS_W, CANVAS_H);
-                if (!hovering) return;
-
-                const left = Math.max(0, Math.floor((mouseX - RADIUS) / MIN_CELL) * MIN_CELL);
-                const top = Math.max(0, Math.floor((mouseY - RADIUS) / MIN_CELL) * MIN_CELL);
-                const right = Math.min(CANVAS_W, Math.ceil((mouseX + RADIUS) / MIN_CELL) * MIN_CELL);
-                const bottom = Math.min(CANVAS_H, Math.ceil((mouseY + RADIUS) / MIN_CELL) * MIN_CELL);
-
-                for (let y = top; y < bottom; y += MIN_CELL) {
-                    for (let x = left; x < right; x += MIN_CELL) {
-                        const cx = x + MIN_CELL / 2;
-                        const cy = y + MIN_CELL / 2;
-                        const dist = Math.hypot(cx - mouseX, cy - mouseY);
-                        if (dist > RADIUS) continue;
-
-                        const t = dist / RADIUS;
-                        const block = Math.max(MIN_CELL, Math.round(MAX_BLOCK - (MAX_BLOCK - MIN_CELL) * t));
-                        const sx = Math.min(CANVAS_W - 1, Math.floor(cx / block) * block + Math.floor(block / 2));
-                        const sy = Math.min(CANVAS_H - 1, Math.floor(cy / block) * block + Math.floor(block / 2));
-
-                        ctx.fillStyle = sampleColor(sx, sy);
-                        ctx.fillRect(x, y, MIN_CELL, MIN_CELL);
-                    }
-                }
-            }
-
-            function scheduleRender() {
-                if (rafPending) return;
-                rafPending = true;
-                requestAnimationFrame(render);
-            }
-
-            function toCanvasCoords(clientX, clientY) {
-                const rect = canvas.getBoundingClientRect();
-                return {
-                    x: (clientX - rect.left) * (CANVAS_W / rect.width),
-                    y: (clientY - rect.top) * (CANVAS_H / rect.height)
-                };
-            }
-
-            container.addEventListener('mousemove', (e) => {
-                const pos = toCanvasCoords(e.clientX, e.clientY);
-                mouseX = pos.x;
-                mouseY = pos.y;
-                hovering = true;
-                scheduleRender();
-            });
-
-            container.addEventListener('mouseleave', () => {
-                hovering = false;
-                scheduleRender();
-            });
-
-            const img = new Image();
-            img.onload = () => {
-                sourceCanvas = document.createElement('canvas');
-                sourceCanvas.width = CANVAS_W;
-                sourceCanvas.height = CANVAS_H;
-                const sctx = sourceCanvas.getContext('2d');
-                sctx.filter = 'grayscale(15%)';
-                sctx.drawImage(img, 0, 0, CANVAS_W, CANVAS_H);
-                sourceData = sctx.getImageData(0, 0, CANVAS_W, CANVAS_H).data;
-                render();
-            };
+            img.onload = () => img.classList.add('loaded');
             img.src = `/images/${coverImg(design.key)}`;
         }
 
@@ -1603,6 +1772,32 @@
             }
         }
 
+        // Toggle the "Help & Info" panel in the footer
+        function toggleFooterHelp() {
+            const toggle = document.getElementById('footerHelpToggle');
+            const panel = document.getElementById('footerHelpPanel');
+            toggle.classList.toggle('open');
+            panel.classList.toggle('open');
+        }
+
+        // Footer email signup — front-end only for now.
+        // Swap the fetch below for a real endpoint (Mailchimp, Klaviyo, your
+        // own API, etc.) to actually collect addresses.
+        function subscribeFooterEmail() {
+            const input = document.getElementById('footerEmail');
+            const note = document.getElementById('footerSignupNote');
+            const email = input.value.trim();
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+            if (!isValid) {
+                note.textContent = 'Please enter a valid email address.';
+                return;
+            }
+
+            note.textContent = 'Thank you — you\'re on the list.';
+            input.value = '';
+        }
+
         // Header shadow / condense on scroll
         function initHeaderScroll() {
             const header = document.querySelector('header');
@@ -1642,7 +1837,7 @@
 
         // Initialize
         renderGrid();
-        initAboutPixelation();
+        initAboutImage();
         updateCart();
         observeReveals();
         initHeaderScroll();

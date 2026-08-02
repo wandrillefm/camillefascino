@@ -1021,6 +1021,85 @@
             transition: color 0.3s var(--ease);
         }
 
+        .cart-promo {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cart-promo-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            transition: border-color 0.35s var(--ease);
+        }
+
+        .cart-promo-row:focus-within {
+            border-bottom-color: var(--black);
+        }
+
+        .cart-promo-row input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--black);
+            font-family: inherit;
+            font-size: 13px;
+            letter-spacing: 0.02em;
+            padding: 4px 0;
+            text-transform: uppercase;
+        }
+
+        .cart-promo-row input::placeholder {
+            color: var(--text-muted);
+            text-transform: none;
+        }
+
+        .cart-promo-row input:focus {
+            outline: none;
+        }
+
+        .cart-promo-row button {
+            background: transparent;
+            border: none;
+            color: var(--black);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            padding: 4px 0 4px 14px;
+            white-space: nowrap;
+        }
+
+        .cart-promo-row button:hover:not(:disabled) {
+            opacity: 0.6;
+        }
+
+        .cart-promo-row button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .cart-promo-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            min-height: 14px;
+        }
+
+        .cart-promo-note.success {
+            color: var(--black);
+        }
+
+        .cart-discount-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
         /* ──── FOOTER ──── */
         footer {
             margin-top: 60px;
@@ -1387,6 +1466,17 @@
         </div>
         <div class="cart-items" id="cartItems"></div>
         <div class="cart-footer">
+            <div class="cart-promo">
+                <div class="cart-promo-row">
+                    <input type="text" id="promoCodeInput" placeholder="Promo code" autocomplete="off">
+                    <button type="button" onclick="applyPromoCode()" id="promoApplyBtn">Apply</button>
+                </div>
+                <div class="cart-promo-note" id="promoNote"></div>
+            </div>
+            <div class="cart-discount-row" id="cartDiscountRow" style="display:none;">
+                <span id="cartDiscountLabel">Discount</span>
+                <span id="cartDiscountAmount">−€0</span>
+            </div>
             <div class="cart-total">
                 <span>Total</span>
                 <span id="cartTotal">€0</span>
@@ -1461,6 +1551,7 @@
     <script src="camille-catalogue.js"></script>
     <script>
         let cart = [];
+        let appliedPromo = null; // { code, discountPercent } once validated server-side
         let currentProduct = null;
         let currentSize = null;
 
@@ -1588,12 +1679,17 @@
         function addToCart(event) {
             if (!currentProduct || !currentSize) return;
 
+            const type = currentProduct.types[0];
+            const color = currentProduct.colors[0];
+
             const item = {
                 id: currentProduct.id,
                 key: currentProduct.key,
                 design: currentProduct.label,
+                type,
+                color,
                 size: currentSize,
-                price: 39,
+                price: getProductPrice(currentProduct.key, type),
                 image: currentProduct.images[0]
             };
 
@@ -1698,10 +1794,25 @@
                 cartCount.classList.add('bump');
             }
 
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const discountRow = document.getElementById('cartDiscountRow');
+            let total = subtotal;
+
+            if (appliedPromo && cart.length > 0) {
+                const discountedTotal = cart.reduce((sum, item) => sum + discountedPrice(item.price), 0);
+                const discountValue = Math.round((subtotal - discountedTotal) * 100) / 100;
+                document.getElementById('cartDiscountLabel').textContent = `Discount (${appliedPromo.code})`;
+                document.getElementById('cartDiscountAmount').textContent = `−€${discountValue.toFixed(2)}`;
+                discountRow.style.display = 'flex';
+                total = discountedTotal;
+            } else {
+                discountRow.style.display = 'none';
+            }
+
             cartTotal.textContent = '€' + total.toFixed(2);
 
             if (cart.length === 0) {
+                appliedPromo = null;
                 cartItems.innerHTML = '<div class="cart-empty">Your cart is empty</div>';
                 return;
             }
@@ -1733,6 +1844,63 @@
             `).join('');
         }
 
+        // Price after the currently applied promo, rounded the same way
+        // /api/checkout.js and /api/validate-promo.js round it server-side.
+        function discountedPrice(price) {
+            if (!appliedPromo) return price;
+            return Math.round(price * (1 - appliedPromo.discountPercent) * 10) / 10;
+        }
+
+        // Validate a promo code against /api/validate-promo before checkout
+        async function applyPromoCode() {
+            const input = document.getElementById('promoCodeInput');
+            const note = document.getElementById('promoNote');
+            const btn = document.getElementById('promoApplyBtn');
+            const code = input.value.trim();
+
+            if (!code) {
+                note.textContent = 'Enter a code first.';
+                note.classList.remove('success');
+                return;
+            }
+
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+
+            btn.disabled = true;
+            note.textContent = 'Checking…';
+            note.classList.remove('success');
+
+            try {
+                const res = await fetch('/api/validate-promo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ promoCode: code, total: subtotal })
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok || !data.valid) {
+                    appliedPromo = null;
+                    note.textContent = data.error || 'Invalid code.';
+                    note.classList.remove('success');
+                    updateCart();
+                    return;
+                }
+
+                appliedPromo = { code: data.code, discountPercent: data.discountPercent };
+                note.textContent = `Code ${data.code} applied — −${data.discountPercentDisplay}%`;
+                note.classList.add('success');
+                updateCart();
+            } catch (err) {
+                appliedPromo = null;
+                note.textContent = 'Something went wrong. Please try again.';
+                note.classList.remove('success');
+                updateCart();
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
         // Toggle cart sidebar
         function toggleCart() {
             document.getElementById('cartSidebar').classList.toggle('open');
@@ -1748,10 +1916,21 @@
             btn.disabled = true;
 
             try {
+                const items = cart.map(item => ({
+                    design: item.id,
+                    type: item.type,
+                    color: item.color,
+                    size: item.size,
+                    price: discountedPrice(item.price)
+                }));
+
+                const payload = { items };
+                if (appliedPromo) payload.promoCode = appliedPromo.code;
+
                 const res = await fetch('/api/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ items: cart })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await res.json();
@@ -1780,10 +1959,9 @@
             panel.classList.toggle('open');
         }
 
-        // Footer email signup — front-end only for now.
-        // Swap the fetch below for a real endpoint (Mailchimp, Klaviyo, your
-        // own API, etc.) to actually collect addresses.
-        function subscribeFooterEmail() {
+        // Footer email signup — sends the address to /api/subscribe,
+        // which stores it in Supabase.
+        async function subscribeFooterEmail() {
             const input = document.getElementById('footerEmail');
             const note = document.getElementById('footerSignupNote');
             const email = input.value.trim();
@@ -1794,8 +1972,29 @@
                 return;
             }
 
-            note.textContent = 'Thank you — you\'re on the list.';
-            input.value = '';
+            note.textContent = 'Submitting…';
+
+            try {
+                const res = await fetch('/api/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    note.textContent = data.error || 'Something went wrong. Please try again.';
+                    return;
+                }
+
+                note.textContent = data.alreadySubscribed
+                    ? 'You\'re already on the list.'
+                    : 'Thank you — you\'re on the list.';
+                input.value = '';
+            } catch (err) {
+                note.textContent = 'Something went wrong. Please try again.';
+            }
         }
 
         // Header shadow / condense on scroll

@@ -36,7 +36,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 41.jpeg', 'Groupe 42.jpeg', 'Groupe 43.jpeg', 'Groupe 44.jpeg'],
+    images: ['Groupe 41.jpg', 'Groupe 42.jpg', 'Groupe 43.jpg', 'Groupe 44.jpg'],
     collection: 'drop1',
   },
   {
@@ -46,7 +46,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 45.jpeg', 'Groupe 46.jpeg', 'Groupe 47.jpeg', 'Groupe 48.jpeg'],
+    images: ['Groupe 45.jpg', 'Groupe 46.jpg', 'Groupe 47.jpg', 'Groupe 48.jpg'],
     collection: 'drop1',
   },
   {
@@ -56,7 +56,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 49.jpeg', 'Groupe 50.jpeg', 'Groupe 51.jpeg', 'Groupe 52.jpeg'],
+    images: ['Groupe 49.jpg', 'Groupe 50.jpg', 'Groupe 51.jpg', 'Groupe 52.jpg'],
     collection: 'drop1',
   },
   {
@@ -66,7 +66,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 53.jpeg', 'Groupe 54.jpeg', 'Groupe 55.jpeg', 'Groupe 56.jpeg'],
+    images: ['Groupe 53.jpg', 'Groupe 54.jpg', 'Groupe 55.jpg', 'Groupe 56.jpg'],
     collection: 'drop1',
   },
   {
@@ -76,7 +76,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 57.jpeg', 'Groupe 58.jpeg', 'Groupe 59.jpeg', 'Groupe 60.jpeg'],
+    images: ['Groupe 57.jpg', 'Groupe 58.jpg', 'Groupe 59.jpg', 'Groupe 60.jpg'],
     collection: 'drop1',
   },
   {
@@ -86,7 +86,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 61.jpeg', 'Groupe 62.jpeg', 'Groupe 63.jpeg', 'Groupe 64.jpeg'],
+    images: ['Groupe 61.jpg', 'Groupe 62.jpg', 'Groupe 63.jpg', 'Groupe 64.jpg'],
     collection: 'drop1',
   }
 //  {
@@ -96,7 +96,7 @@ const DESIGNS = [
 //    description: "",
 //    types:  ['tshirt'],
 //    colors: ['blue','pink','yellow','white'],
-//    images: ['Groupe 65.jpeg', 'Groupe 66.jpeg', 'Groupe 67.jpeg', 'Groupe 68.jpeg'],
+//    images: ['Groupe 65.jpg', 'Groupe 66.jpg', 'Groupe 67.jpg', 'Groupe 68.jpg'],
 //    collection: 'drop1',
 //  },
 ];

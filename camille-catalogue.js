@@ -17,7 +17,10 @@ const TYPES = [
 ];
 
 const COLORS = [
-  { id: 'navy', label: 'Navy', code: '1' }
+  { id: 'blue', label: 'Light Blue', code: '1' },
+  { id: 'pink', label: 'Soft Pink', code: '2' },
+  { id: 'yellow', label: 'Pastel Yellow', code: '3' },
+  { id: 'white', label: 'White', code: '4' }
 ];
 
 const SIZES = ['S', 'M', 'L', 'XL'];

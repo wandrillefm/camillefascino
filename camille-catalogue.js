@@ -36,7 +36,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 41.jpg', 'Groupe 42.jpg', 'Groupe 43.jpg', 'Groupe 44.jpg'],
+    images: ['Group 41.jpg', 'Group 42.jpg', 'Group 43.jpg', 'Group 44.jpg'],
     collection: 'drop1',
   },
   {
@@ -46,7 +46,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 45.jpg', 'Groupe 46.jpg', 'Groupe 47.jpg', 'Groupe 48.jpg'],
+    images: ['Group 45.jpg', 'Group 46.jpg', 'Group 47.jpg', 'Group 48.jpg'],
     collection: 'drop1',
   },
   {
@@ -56,7 +56,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 49.jpg', 'Groupe 50.jpg', 'Groupe 51.jpg', 'Groupe 52.jpg'],
+    images: ['Group 49.jpg', 'Group 50.jpg', 'Group 51.jpg', 'Group 52.jpg'],
     collection: 'drop1',
   },
   {
@@ -66,7 +66,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 53.jpg', 'Groupe 54.jpg', 'Groupe 55.jpg', 'Groupe 56.jpg'],
+    images: ['Group 53.jpg', 'Group 54.jpg', 'Group 55.jpg', 'Group 56.jpg'],
     collection: 'drop1',
   },
   {
@@ -76,7 +76,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 57.jpg', 'Groupe 58.jpg', 'Groupe 59.jpg', 'Groupe 60.jpg'],
+    images: ['Group 57.jpg', 'Group 58.jpg', 'Group 59.jpg', 'Group 60.jpg'],
     collection: 'drop1',
   },
   {
@@ -86,7 +86,7 @@ const DESIGNS = [
     description: "",
     types:  ['tshirt'],
     colors: ['blue','pink','yellow','white'],
-    images: ['Groupe 61.jpg', 'Groupe 62.jpg', 'Groupe 63.jpg', 'Groupe 64.jpg'],
+    images: ['Group 61.jpg', 'Group 62.jpg', 'Group 63.jpg', 'Group 64.jpg'],
     collection: 'drop1',
   }
 //  {
@@ -96,7 +96,7 @@ const DESIGNS = [
 //    description: "",
 //    types:  ['tshirt'],
 //    colors: ['blue','pink','yellow','white'],
-//    images: ['Groupe 65.jpg', 'Groupe 66.jpg', 'Groupe 67.jpg', 'Groupe 68.jpg'],
+//    images: ['Group 65.jpg', 'Group 66.jpg', 'Group 67.jpg', 'Group 68.jpg'],
 //    collection: 'drop1',
 //  },
 ];

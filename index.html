@@ -678,11 +678,19 @@
             margin-bottom: 30px;
         }
 
+        .option-group {
+            margin-bottom: 22px;
+        }
+
         .option-label {
             display: block;
             font-size: 12px;
             color: var(--text-muted);
             margin-bottom: 10px;
+        }
+
+        .option-label .option-value {
+            color: var(--black);
         }
 
         .option-buttons {
@@ -713,6 +721,44 @@
             background: var(--black);
             border-color: var(--black);
             color: var(--white);
+        }
+
+        .color-buttons {
+            gap: 12px;
+            align-items: center;
+        }
+
+        .color-btn {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--gray);
+            cursor: pointer;
+            box-shadow: inset 0 0 0 2px var(--white);
+        }
+
+        .color-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .color-btn:active {
+            transform: translateY(0) scale(0.94);
+        }
+
+        .color-btn::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px solid transparent;
+            transition: border-color 0.35s var(--ease);
+        }
+
+        .color-btn.active::after {
+            border-color: var(--black);
         }
 
         .btn-add-cart {
@@ -1449,6 +1495,10 @@
 
                 <div class="product-options">
                     <div class="option-group">
+                        <label class="option-label">Color — <span class="option-value" id="colorName"></span></label>
+                        <div class="option-buttons color-buttons" id="colorOptions"></div>
+                    </div>
+                    <div class="option-group">
                         <label class="option-label">Size</label>
                         <div class="option-buttons" id="sizeOptions"></div>
                     </div>
@@ -1555,11 +1605,12 @@
         let appliedPromo = null; // { code, discountPercent } once validated server-side
         let currentProduct = null;
         let currentSize = null;
+        let currentColor = null;
 
-        // Render products grid - limited to 3 items
+        // Render products grid - limited to 6 items
         function renderGrid() {
             const grid = document.getElementById('productsGrid');
-            const designs = DESIGNS.slice(0, 3); // Only first 3 products
+            const designs = DESIGNS.slice(0, 6); // First 6 products
             grid.innerHTML = designs.map((design, i) => {
                 const cover = coverImg(design.key);
                 const secondary = (design.images || []).find(img => img !== cover);
@@ -1609,6 +1660,17 @@
             }
         }
 
+        // Returns true if a color value looks like a CSS color (hex code or
+        // a recognizable named color) rather than plain descriptive text.
+        function isCssColor(value) {
+            if (typeof value !== 'string') return false;
+            if (/^#[0-9a-f]{3,8}$/i.test(value)) return true;
+            const probe = document.createElement('span').style;
+            probe.color = '';
+            probe.color = value;
+            return probe.color !== '';
+        }
+
         // Show a product's full page
         function showProduct(designKey) {
             const design = DESIGNS.find(d => d.key === designKey);
@@ -1628,6 +1690,19 @@
                 </div>
             `).join('');
             document.getElementById('productGallery').innerHTML = galleryHtml;
+
+
+// Color options
+const colors = (currentProduct.colors && currentProduct.colors.length) ? currentProduct.colors : ['blue'];
+const colorsHtml = colors.map((colorId, i) => {
+    const swatch = getColorHex(colorId);
+    const label = getColorLabel(colorId);
+    return `<button type="button" class="color-btn ${i === 0 ? 'active' : ''}" style="background:${swatch}" title="${label}" aria-label="${label}" onclick="selectColor(this, '${colorId}')"></button>`;
+}).join('');
+
+document.getElementById('colorOptions').innerHTML = colorsHtml;
+document.getElementById('colorName').textContent = getColorLabel(colors[0]);
+currentColor = colors[0];
 
             // Size options
             const sizesHtml = SIZES.map(size => `
@@ -1669,6 +1744,15 @@
             }
         }
 
+        // Select color
+        function selectColor(element, color) {
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            currentColor = color;
+            const nameEl = document.getElementById('colorName');
+            if (nameEl) nameEl.textContent = color;
+        }
+
         // Select size
         function selectSize(element, size) {
             document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
@@ -1678,10 +1762,10 @@
 
         // Add to cart
         function addToCart(event) {
-            if (!currentProduct || !currentSize) return;
+            if (!currentProduct || !currentSize || !currentColor) return;
 
             const type = currentProduct.types[0];
-            const color = currentProduct.colors[0];
+            const color = currentColor;
 
             const item = {
                 id: currentProduct.id,
@@ -1822,6 +1906,7 @@
                 <div class="cart-item" data-index="${i}" style="animation-delay:${i * 0.05}s" onclick="goToProductFromCart(${i})">
                     <div class="cart-item-main">
                         <div class="cart-item-name">${item.design}</div>
+                        <div class="cart-item-details">${item.color}</div>
                         <div class="cart-item-details cart-item-size-row">
                             <span>Size</span>
                             <div class="cart-size-dropdown" data-index="${i}">

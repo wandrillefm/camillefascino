@@ -1,6 +1,5 @@
 // ─────────────────────────────────────────────
-//  CATALOGUE CAMILLE FASCINO
-//  3 navy tees — same price, same cut
+//   CATALOGUE CAMILLE FASCINO
 // ─────────────────────────────────────────────
 
 const COLLECTIONS = [
@@ -17,16 +16,15 @@ const TYPES = [
 ];
 
 const COLORS = [
-  { id: 'blue', label: 'Light Blue', code: '1' },
-  { id: 'pink', label: 'Soft Pink', code: '2' },
-  { id: 'yellow', label: 'Pastel Yellow', code: '3' },
-  { id: 'white', label: 'White', code: '4' }
+  { id: 'blue', label: 'blue', code: '1', hex: '#B4D4ED' },
+  { id: 'pink', label: 'pink', code: '2', hex: '#FFDAD2' },
+  { id: 'yellow', label: 'yellow', code: '3', hex: '#FDF1BD' },
+  { id: 'white', label: 'white', code: '4', hex: '#F5F4F2' }
 ];
 
 const SIZES = ['S', 'M', 'L', 'XL'];
 
 // ─── DESIGNS ───────────────────────────────
-// Camille Fascino — 3 pieces, same philosophy
 
 const DESIGNS = [
   {
@@ -89,41 +87,35 @@ const DESIGNS = [
     images: ['Group 61.jpg', 'Group 62.jpg', 'Group 63.jpg', 'Group 64.jpg'],
     collection: 'drop1',
   }
-//  {
-//    id: '7', 
-//    key: 'advice', 
-//    label: 'ADVICE TEE',
-//    description: "",
-//    types:  ['tshirt'],
-//    colors: ['blue','pink','yellow','white'],
-//    images: ['Group 65.jpg', 'Group 66.jpg', 'Group 67.jpg', 'Group 68.jpg'],
-//    collection: 'drop1',
-//  },
 ];
 
 // ─── HELPERS ───────────────────────────────
 
-/** First image of a design (grid card fallback) */
+/** First image of a design */
 function coverImg(designKey) {
   const d = DESIGNS.find(x => x.key === designKey);
   return d && d.images.length ? d.images[0] : 'placeholder.png';
 }
 
-/**
- * Get product price
- * @param {string} designKey - Design slug (ex: 'ardere')
- * @param {string} typeId - Item type (always 'tshirt' for now)
- * @returns {number} Price in euros
- */
+/** Get product price */
 function getProductPrice(designKey, typeId) {
   const design = DESIGNS.find(d => d.key === designKey);
   const type = TYPES.find(t => t.id === typeId);
-  
   if (!design || !type) return 0;
-  
   return type.price[design.collection] || 0;
 }
 
+/** Get color hex or label from color ID */
+function getColorHex(colorId) {
+  const c = COLORS.find(x => x.id === colorId);
+  return c ? c.hex : colorId;
+}
+
+function getColorLabel(colorId) {
+  const c = COLORS.find(x => x.id === colorId);
+  return c ? c.label : colorId;
+}
+
 if (typeof module !== 'undefined') {
-  module.exports = { COLLECTIONS, TYPES, COLORS, SIZES, DESIGNS, coverImg, getProductPrice };
+  module.exports = { COLLECTIONS, TYPES, COLORS, SIZES, DESIGNS, coverImg, getProductPrice, getColorHex, getColorLabel };
 }
